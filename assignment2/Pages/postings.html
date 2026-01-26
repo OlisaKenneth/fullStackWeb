@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Posting System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        input, textarea, button { display: block; margin: 10px 0; width: 300px; }
+        .post { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        .timestamp { font-size: 0.8em; color: gray; }
+    </style>
+</head>
+<body>
+
+<h1>Client-Server Posting System</h1>
+
+<h2>Create a Post</h2>
+<input type="text" id="topic" placeholder="Topic">
+<textarea id="data" placeholder="Post content"></textarea>
+<button onclick="submitPost()">Submit</button>
+
+<h2>Posts</h2>
+<div id="posts"></div>
+
+<script>
+async function loadPosts() {
+    const response = await fetch('/posts');
+    const posts = await response.json();
+
+    const container = document.getElementById('posts');
+    container.innerHTML = '';
+
+    posts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = 'post';
+
+        div.innerHTML = `
+            <strong>${post.topic}</strong>
+            <p>${post.data}</p>
+            <div class="timestamp">${post.timestamp}</div>
+        `;
+
+        container.appendChild(div);
+    });
+}
+
+async function submitPost() {
+    const topic = document.getElementById('topic').value;
+    const data = document.getElementById('data').value;
+
+    await fetch('/postmessage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, data })
+    });
+
+    document.getElementById('topic').value = '';
+    document.getElementById('data').value = '';
+
+    loadPosts(); // real-time refresh
+}
+
+// Load existing posts on page load
+loadPosts();
+</script>
+
+</body>
+</html>

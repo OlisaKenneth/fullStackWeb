@@ -1,0 +1,9 @@
+services:
+  postingapp:
+    build: .
+    ports:
+      - "3000:8080"
+    volumes:
+      - .:/usr/src/app
+    stdin_open: true
+    tty: true
