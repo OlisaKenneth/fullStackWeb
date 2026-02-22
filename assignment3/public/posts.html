@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Posts</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>All Posts</h1>
+    <div id="posts"></div>
+    <a href="index.html">Back</a>
+
+<script>
+async function loadPosts() {
+    const res = await fetch('/api/posts');
+    const posts = await res.json();
+
+    const container = document.getElementById('posts');
+    container.innerHTML = '';
+
+    posts.forEach(post => {
+        const div = document.createElement('div');
+        div.className = "post";
+        div.innerHTML = `
+            <h3>${post.topic}</h3>
+            <p>${post.data}</p>
+            <small>${post.timestamp}</small>
+        `;
+        container.appendChild(div);
+    });
+}
+
+loadPosts();
+setInterval(loadPosts, 3000); // auto refresh every 3 seconds
+</script>
+</body>
+</html>

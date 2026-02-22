@@ -37,6 +37,9 @@ app.get('/posts', (req, res) => {
 // Serve frontend
 app.use('/', express.static('pages'));
 
+app.get('/', (req, res) => res.redirect('/posting.html'));
+
+
 app.listen(8080, () => {
     console.log('Server running on port 8080');
 });
