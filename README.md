@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Next Launch Kit
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) and enhanced with PostgreSQL, Prisma, auth.js, and Docker support.
@@ -177,3 +178,7 @@ To alphabetically sort translations copy and paste the contents of your messages
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+=======
+# fullStackWeb
+Learning full stack web programming
+>>>>>>> 857601b7ecf4bb6be44a0361262779e6cb34c535
