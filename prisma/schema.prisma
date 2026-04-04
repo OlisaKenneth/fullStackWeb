@@ -8,93 +8,65 @@ datasource db {
 }
 
 model User {
-  id                       Int                 @id @default(autoincrement())
-  name                     String?
-  first_name               String?
-  last_name                String?
-  email                    String              @unique
-  emailVerified            Boolean             @default(false)
-  image                    String?
-  role                     Role                @default(USER)
-  status                   Status              @default(UNVERIFIED)
-  password_reset_token     String?             @unique
-  password_reset_expires   DateTime?
-  stripe_customer_id       String?             @unique @map("stripe_customer_id")
-  stripe_subscription_id   String?             @unique @map("stripe_subscription_id")
-  subscription_status      SubscriptionStatus? @map("subscription_status")
-  subscription_end_date    DateTime?           @map("subscription_end_date")
-  createdAt                DateTime            @default(now()) @map("created_at")
-  updatedAt                DateTime            @updatedAt @map("updated_at")
-
-  accounts Account[]
-  sessions Session[]
-
-  @@map("users")
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      String   @default("USER")
+  createdAt DateTime @default(now())
+  posts     Post[]
+  replies   Reply[]
+  votes     Vote[]
 }
 
-model Account {
-  id                    Int       @id @default(autoincrement())
-  userId                Int       @map("user_id")
-  accountId             String    @map("account_id")
-  providerId            String    @map("provider_id")
-  accessToken           String?   @map("access_token") @db.Text
-  refreshToken          String?   @map("refresh_token") @db.Text
-  accessTokenExpiresAt  DateTime? @map("access_token_expires_at")
-  refreshTokenExpiresAt DateTime? @map("refresh_token_expires_at")
-  scope                 String?
-  idToken               String?   @map("id_token") @db.Text
-  password              String?
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("accounts")
+model Channel {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  posts     Post[]
 }
 
-model Session {
-  id        Int      @id @default(autoincrement())
-  expiresAt DateTime @map("expires_at")
-  token     String   @unique
-  ipAddress String?  @map("ip_address")
-  userAgent String?  @map("user_agent")
-  userId    Int      @map("user_id")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("sessions")
+model Post {
+  id         String   @id @default(cuid())
+  title      String
+  content    String
+  screenshot String?
+  authorId   String
+  channelId  String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id])
+  channel    Channel  @relation(fields: [channelId], references: [id])
+  replies    Reply[]
+  votes      Vote[]
 }
 
-model Verification {
-  id         Int      @id @default(autoincrement())
-  identifier String
-  value      String
-  expiresAt  DateTime @map("expires_at")
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @updatedAt @map("updated_at")
-
-  @@map("verifications")
+model Reply {
+  id         String   @id @default(cuid())
+  content    String
+  screenshot String?
+  authorId   String
+  postId     String
+  parentId   String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  author     User     @relation(fields: [authorId], references: [id])
+  post       Post     @relation(fields: [postId], references: [id])
+  parent     Reply?   @relation("ReplyToReply", fields: [parentId], references: [id])
+  children   Reply[]  @relation("ReplyToReply")
+  votes      Vote[]
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-enum Status {
-  ACTIVE
-  INACTIVE
-  UNVERIFIED
-}
-
-enum SubscriptionStatus {
-  active
-  canceled
-  incomplete
-  incomplete_expired
-  past_due
-  trialing
-  unpaid
+model Vote {
+  id        String   @id @default(cuid())
+  value     Int
+  userId    String
+  postId    String?
+  replyId   String?
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  post      Post?    @relation(fields: [postId], references: [id])
+  reply     Reply?   @relation(fields: [replyId], references: [id])
+  @@unique([userId, postId])
+  @@unique([userId, replyId])
 }
