@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useSession } from 'next-auth/react';
 
 type Channel = {
   id: string;
@@ -9,6 +10,7 @@ type Channel = {
 };
 
 export default function ChannelsPage() {
+  const { data: session } = useSession();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [loading, setLoading] = useState(true);
   const [newChannelName, setNewChannelName] = useState('');
@@ -59,19 +61,21 @@ export default function ChannelsPage() {
     <div className="p-4 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">Channels</h1>
 
-      {/* Create channel form */}
-      <form onSubmit={handleCreateChannel} className="mb-6 flex gap-2">
-        <input
-          type="text"
-          placeholder="New channel name"
-          value={newChannelName}
-          onChange={(e) => setNewChannelName(e.target.value)}
-          className="border p-2 rounded flex-grow"
-        />
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-          Create Channel
-        </button>
-      </form>
+      {/* Create channel form - admin only */}
+      {session?.user?.role === 'ADMIN' && (
+        <form onSubmit={handleCreateChannel} className="mb-6 flex gap-2">
+          <input
+            type="text"
+            placeholder="New channel name"
+            value={newChannelName}
+            onChange={(e) => setNewChannelName(e.target.value)}
+            className="border p-2 rounded flex-grow"
+          />
+          <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+            Create Channel
+          </button>
+        </form>
+      )}
       {error && <div className="text-red-500 mb-4">{error}</div>}
 
       {/* Channel list */}

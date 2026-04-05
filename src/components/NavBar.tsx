@@ -11,6 +11,7 @@ function NavBarContent() {
       <Link href="/" className="font-bold">Q&A Tool</Link>
       <div className="space-x-4">
         <Link href="/channels">Channels</Link>
+        <Link href="/search">Search</Link>
         {session ? (
           <>
             <span>Hello, {session.user?.name}</span>

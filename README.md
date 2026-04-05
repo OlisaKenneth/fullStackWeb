@@ -1,184 +1,120 @@
-<<<<<<< HEAD
-# Next Launch Kit
+# Channel-Based Programming Q&A Tool
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app) and enhanced with PostgreSQL, Prisma, auth.js, and Docker support.
+A full‑stack Q&A platform where users can ask questions, reply in threaded conversations, vote, attach screenshots, and search. Built with Next.js, Prisma, PostgreSQL, and Docker.
 
-## Tech Stack
+## Features
+- **Channels** – browse and create (admin only)
+- **Posts** – ask questions, attach images (PNG/JPEG/WebP, ≤5 MB)
+- **Threaded replies** – unlimited nesting depth
+- **Voting** – up/down on posts and replies (one vote per user, change/remove allowed)
+- **Search** – 5 query types (substring, by author, most/least posts, highest ranked) with pagination
+- **Admin dashboard** – delete users, channels, posts, replies
+- **Authentication** – email/password with bcrypt hashing
+- **Docker‑first** – one‑command setup
 
-- **Framework**: [Next.js](https://nextjs.org/docs) with the App Router
-- **Authentication**: [NextAuth.js](https://next-auth.js.org) with credentials and Google provider
-- **Styling/UI**: [TailwindCSS](https://tailwindcss.com/docs) with [shadcn/ui](https://ui.shadcn.com/docs) components
-- **Database**: [PostgreSQL](https://www.postgresql.org/docs/)
-- **ORM**: [Prisma](https://www.prisma.io/docs)
-- **Validation**: [Zod](https://zod.dev)
-- **Logs**: [Winston](https://github.com/winstonjs/winston#documentation)
-- **Environment**: [Docker](https://docs.docker.com) & [Docker Compose](https://docs.docker.com/compose/)
-- **TypeScript**: [TypeScript](https://www.typescriptlang.org/docs/)
-- **Tests**: [Playwright](https://playwright.dev/docs/)
+## Run with Docker (recommended for marking)
 
-## Prerequisites
+### Prerequisites
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running
+- Git
 
-Before you begin, ensure you have the following installed:
-
-- [Docker](https://docs.docker.com/get-docker/)
-- [Docker Compose](https://docs.docker.com/compose/install/)
-- v20.10.0 of [Node.js](https://nodejs.org/)
-- [nvm](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) if you want to manage node versions by yourself (recommended)
-
-## Quick Start
-
-1. **Clone the repository**
-
+### Steps
+1. Clone the repository  
    ```bash
-   git clone https://github.com/TeoMastro/next-launch-kit.git
-   cd next-launch-kit
+   git clone https://github.com/OlisaKenneth/fullStackWeb.git
+   cd qna-tool
    ```
-
-2. **Create environment file**
-
+2. Create environment file (from example)  
    ```bash
    cp .env.example .env
    ```
+   (No changes needed – the defaults work with Docker.)
 
-3. **Start the database with Docker**
+Build and start the containers
 
+3. Build and start the containers  
    ```bash
-   # Start PostgreSQL and the app
-   docker-compose up -d
+   docker-compose up --build
    ```
+   
+Open your browser at http://localhost:3000
+Default admin credentials
 
-4. **Install the project locally**
+Email: admin@example.com
+Password: admin123
+The database is automatically seeded with this admin user and one default channel (“General”).
 
-   ```bash
-   npm i
-   ```
+Manual seed (if needed)
 
-5. **Push the database schema and seed the database**
+bash
+npx prisma db seed
+Development without Docker
 
-   ```bash
-   # Run database migrations
-   npx prisma db push
+Install dependencies
 
-   # Seed the database (optional)
-   npm run db:seed
-   ```
+bash
+npm install
+Set up .env with your local PostgreSQL (e.g., on port 5434)
 
-6. **Make sure to [register your database](https://github.com/TeoMastro/next-launch-kit?tab=readme-ov-file#registering-the-postgresql-server) on pg admin before continuing to step 5**
+text
+DATABASE_URL="postgresql://postgres:password123@localhost:5434/next_launch_kit"
+NEXTAUTH_SECRET=any-secret
+NEXTAUTH_URL=http://localhost:3000
+Run migrations and seed
 
-7. **To run in dev mode**
+bash
+npx prisma db push
+npx prisma db seed
+Start the development server
 
-   ```bash
-   npm run dev
-   ```
+bash
+npm run dev
+Project Structure
 
-   Navigate to [http://localhost:3000/dashboard](http://localhost:3000/dashboard) and login with the admin user to see the application.
+text
+src/
+├── app/                 # Next.js App Router (pages & API routes)
+│   ├── api/             # Backend endpoints
+│   ├── auth/            # Sign in / sign up pages
+│   ├── channels/        # Channel list & single channel view
+│   ├── posts/           # Post detail (threaded replies)
+│   ├── search/          # Search page
+│   └── admin/           # Admin dashboard
+├── components/          # Reusable UI (NavBar)
+├── lib/                 # Auth helpers
+└── types/               # TypeScript declarations
+prisma/
+├── schema.prisma        # Database schema
+└── seed.ts              # Seed script (admin + default channel)
+public/uploads/          # Uploaded images (persisted via Docker volume)
+docker-compose.yml       # Multi‑container orchestration
+Dockerfile               # Production build
+Reports & Demo
 
-## pgAdmin Server Registration
+Design report – DESIGN_REPORT.md (architecture, DB choice, API endpoints, screenshot storage, key packages)
+Test report – TEST_REPORT.md (20 manual test cases with evidence)
+Demo video – (max 10 min, shows all core flows)
 
-After starting the containers with `docker-compose up -d`, pgAdmin won't automatically discover your PostgreSQL database. You need to manually register the server connection.
+Technologies Used:
+Next.js 16 (App Router, Turbopack)
+Prisma ORM + PostgreSQL
+NextAuth.js (Credentials provider)
+Tailwind CSS
+TypeScript
+Docker + docker‑compose
+Multer (file upload)
 
-### Accessing pgAdmin
+Troubleshooting:
+“Cannot find module” during Docker build
 
-1. **Open pgAdmin** in your browser at [http://localhost:5051](http://localhost:5051)
-2. **Log in** with the credentials:
-   - Email: `admin@nextlaunchkit.com`
-   - Password: `nextlaunchkit123`
+Make sure you ran docker-compose down -v and then docker-compose up --build – this clears old volumes.
 
-### Registering the PostgreSQL Server
+Uploaded images not showing
 
-Once logged into pgAdmin, follow these steps to connect to your PostgreSQL database:
+Check that the file exists in public/uploads/ on your host.
+Verify the Docker volume is mounted: docker exec -it next_launch_kit_app ls -la /app/public/uploads/
+Ensure the database screenshot field starts with /uploads/.
+Admin dashboard redirects to sign in
 
-1. **Right-click on "Servers"** in the left sidebar
-2. **Select "Register" > "Server..."** from the context menu
-3. **Fill in the General tab:**
-   - **Name**: `Next Launch Kit DB` (or any name you prefer)
-   - **Server group**: Leave as "Servers"
-   - **Comments**: Optional description
+Log out and sign in again with the admin account (admin@example.com / admin123).
 
-4. **Switch to the Connection tab** and enter:
-   - **Host name/address**: `postgres` (use the container name, not `localhost`)
-   - **Port**: `5432`
-   - **Maintenance database**: `next_launch_kit`
-   - **Username**: `postgres`
-   - **Password**: `password123`
-
-5. **Click "Save"** to register the server
-
-## Demo Accounts
-
-After running the seed script, you can log in with these demo accounts:
-
-- **Admin User**:
-  - Email: `admin@nextlaunchkit.com`
-  - Password: `demoadmin!1`
-  - Role: ADMIN
-
-- **Regular User**:
-  - Email: `user@nextlaunchkit.com`
-  - Password: `demouser!1`
-  - Role: USER
-
-## To use Google smtp
-
-1. Make sure 2fa is enabled in your google account.
-2. Go to [app passords](https://myaccount.google.com/apppasswords) and generate an app password. Then use it in the SMTP_PASSWORD of your .env
-
-## To use Google sign in
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a project.
-3. Go to [Credentials](https://console.cloud.google.com/apis/credentials) and generate credentials.
-4. Make sure OAuth consent screen is enabled for your project.
-5. For more information check the [official documentation of auth.js for Google Provider](https://authjs.dev/getting-started/providers/google)
-
-## package.json scripts
-
-```bash
-# Generate Prisma client
-npm run db:generate
-
-# Create and apply a new migration
-npm run db:migrate
-
-# Push schema changes without creating migration files
-npm run db:push
-
-# Reset the database (⚠️ This will delete all data)
-npm run db:reset
-
-# Seed the database with sample data
-npm run db:seed
-
-# Open Prisma Studio (Database GUI)
-npm run db:studio
-
-# Deploy migrations to test database
-npm run migrate:test
-
-# Reset test database
-npm run migrate:test:reset
-
-# Create and apply migration to test database
-npm run migrate:test:dev
-
-# Push schema changes to test database
-npm run db:push:test
-
-# Format all files
-npm run format
-
-# Check formatting without making changes
-npm run format:check
-```
-
-## Translations sorting
-
-To alphabetically sort translations copy and paste the contents of your messages json file [here](https://novicelab.org/jsonabc/). Then paste it back in the project file.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-=======
-# fullStackWeb
-Learning full stack web programming
->>>>>>> 857601b7ecf4bb6be44a0361262779e6cb34c535
