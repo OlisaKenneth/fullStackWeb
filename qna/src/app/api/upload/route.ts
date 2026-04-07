@@ -11,21 +11,27 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
+    // Validate MIME type
     const allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       return NextResponse.json({ error: 'Only PNG, JPEG, and WebP images are allowed' }, { status: 400 });
     }
 
+    // Validate file size (5 MB)
     if (file.size > 5 * 1024 * 1024) {
       return NextResponse.json({ error: 'File size must be less than 5 MB' }, { status: 400 });
     }
 
+    // Generate unique filename
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
     const extension = file.name.split('.').pop();
     const filename = `${timestamp}-${random}.${extension}`;
+    
+    // Use absolute path inside container
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
     
+    // Ensure directory exists
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
@@ -35,6 +41,7 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
+    // ✅ Return the public URL starting with /uploads/
     const publicUrl = `/uploads/${filename}`;
     return NextResponse.json({ url: publicUrl }, { status: 201 });
   } catch (error) {
