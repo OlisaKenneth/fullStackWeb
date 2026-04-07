@@ -28,10 +28,7 @@ export async function POST(request: NextRequest) {
     const extension = file.name.split('.').pop();
     const filename = `${timestamp}-${random}.${extension}`;
     
-    // Use absolute path inside container
     const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    
-    // Ensure directory exists
     if (!existsSync(uploadDir)) {
       await mkdir(uploadDir, { recursive: true });
     }
@@ -41,9 +38,9 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes);
     await writeFile(filePath, buffer);
 
-    // ✅ Return the public URL starting with /uploads/
-    const publicUrl = `/uploads/${filename}`;
-    return NextResponse.json({ url: publicUrl }, { status: 201 });
+    // ✅ Return URL that uses our image API route
+    const imageUrl = `/api/image/${filename}`;
+    return NextResponse.json({ url: imageUrl }, { status: 201 });
   } catch (error) {
     console.error('Upload error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
