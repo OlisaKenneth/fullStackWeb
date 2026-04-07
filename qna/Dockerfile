@@ -2,18 +2,23 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies (allow legacy peer deps for next-auth compatibility)
 RUN npm ci --legacy-peer-deps
 
+# Copy the rest of the application
 COPY . .
 
+# Generate Prisma client
 RUN npx prisma generate
+
+# Build the Next.js application
 RUN npm run build
 
-# Copy and set up startup script
-COPY scripts/start.sh /start.sh
-RUN chmod +x /start.sh
-
+# Expose the port the app runs on
 EXPOSE 3000
 
-CMD ["/start.sh"]
+# Run database push, seed, and start the server
+CMD ["sh", "-c", "npx prisma db push && npx prisma db seed && npm start"]
