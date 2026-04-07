@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create admin user if not exists
   const adminEmail = 'admin@example.com';
   const existingAdmin = await prisma.user.findUnique({ where: { email: adminEmail } });
   if (!existingAdmin) {
@@ -22,7 +21,6 @@ async function main() {
     console.log('ℹ️ Admin user already exists');
   }
 
-  // Create default channel if none exists
   const channelCount = await prisma.channel.count();
   if (channelCount === 0) {
     await prisma.channel.create({ data: { name: 'General' } });
